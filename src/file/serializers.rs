@@ -2,7 +2,7 @@ use crate::file::configuration::Serializable;
 
 impl Serializable for String {
     fn serialize(&self) -> String {
-        self.clone()
+        String::from("\"".to_owned()+ &self.clone() + "\"")
     }
     fn get_string(&self) -> &String {
         self

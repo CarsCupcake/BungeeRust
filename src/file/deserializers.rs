@@ -1,11 +1,20 @@
-use crate::file::configuration::{ConfigElement, Deserializer};
+use crate::file::configuration::{Deserializer, Serializable};
 
 pub fn deserializers() -> [Box<dyn Deserializer>; 3] { [Box::new(StringDes {}), Box::new(IntDes {}), Box::new(BoolDes {})] }
 
 struct StringDes {}
 impl Deserializer for StringDes {
-    fn deserialize(&self, s: &String, element: &mut ConfigElement) {
-        (*element).data = Some(Box::new((*s).clone()));
+    fn deserialize(&self, s: &String) -> Box<dyn Serializable> {
+        let mut new_s = String::new();
+        let mut i = 0;
+        for c in s.chars() {
+            if i == 0 || i == s.len() - 1 {
+            } else {
+                new_s.push(c);
+            }
+            i += 1;
+        }
+        Box::new((new_s).clone())
     }
 
     fn is_type(&self, s: &String) -> bool {
@@ -17,13 +26,13 @@ impl Deserializer for StringDes {
 struct IntDes {}
 
 impl Deserializer for IntDes {
-    fn deserialize(&self, s: &String,element: &mut ConfigElement) {
+    fn deserialize(&self, s: &String) -> Box<dyn Serializable> {
         let res: Result<i32, _> = (*s).parse();
-        if res.is_err() {
+        return if res.is_err() {
             eprintln!("Error: could not parse \"{}\" as an i32", s);
-            (*element).data = None;
-        }else {
-            (*element).data = Some(Box::new(res.unwrap()));
+            Box::new(0)
+        } else {
+            Box::new(res.unwrap())
         }
     }
 
@@ -39,14 +48,13 @@ impl Deserializer for IntDes {
 struct FloatDes {}
 
 impl Deserializer for FloatDes {
-    fn deserialize(&self, s: &String,element: &mut ConfigElement) {
+    fn deserialize(&self, s: &String) -> Box<dyn Serializable>  {
         let res: Result<f64, _> = (*s).parse();
         if res.is_err() {
             eprintln!("Error: could not parse \"{}\" as an f64", s);
-            (*element).data = None;
-        }else {
-            (*element).data = Some(Box::new(res.unwrap() as f64));
+            return  Box::new(0_f64)
         }
+        Box::new(res.unwrap())
     }
 
     fn is_type(&self, s: &String) -> bool {
@@ -70,13 +78,13 @@ impl Deserializer for FloatDes {
 struct BoolDes {}
 
 impl Deserializer for BoolDes {
-    fn deserialize(&self, s: &String, element: &mut ConfigElement) {
-        if (*s).eq(&"true".to_string()) {
-            (*element).data = Some(Box::new(true));
+    fn deserialize(&self, s: &String)  -> Box<dyn Serializable>  {
+        return  if (*s).eq(&"true".to_string()) {
+           Box::new(true)
         }else if (*s).eq(&"false".to_string()) {
-            (*element).data = Some(Box::new(false));
+          Box::new(false)
         } else {
-            (*element).data = None;
+            panic!("Illegal!")
         }
     }
 
