@@ -117,4 +117,4 @@ buildNumber.properties
 run/
 !/src/
 
-config.yml
+*.yml

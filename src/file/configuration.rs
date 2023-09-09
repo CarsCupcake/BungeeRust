@@ -8,6 +8,12 @@ pub trait Serializable {
     fn get_string(&self) -> &String {
         panic!("Illegal Call")
     }
+    fn get_int32(&self) -> i32 {
+        panic!("Illegal Call")
+    }
+    fn get_f64(&self) -> f64 {
+        panic!("Illegal Call")
+    }
 }
 
 

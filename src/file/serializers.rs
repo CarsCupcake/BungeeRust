@@ -13,11 +13,17 @@ impl Serializable for i32 {
     fn serialize(&self) -> String {
         self.to_string()
     }
+    fn get_int32(&self) -> i32 {
+        self.clone()
+    }
 }
 
 impl Serializable for f64 {
     fn serialize(&self) -> String {
         self.to_string()
+    }
+    fn get_f64(&self) -> f64 {
+        self.clone()
     }
 }
 

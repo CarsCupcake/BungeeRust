@@ -1,8 +1,13 @@
 pub mod file;
+pub mod net;
+mod util;
 
 use std::collections::HashMap;
 use std::net::TcpListener;
+use tokio::spawn;
 use crate::file::configuration::Serializable;
+use crate::net::connection::Player;
+use anyhow::Result;
 
 #[tokio::main]
 async fn main() {
@@ -16,12 +21,13 @@ async fn main() {
     config.save("./config.yml");
     let ip = config.get("ip".to_string()).unwrap().get_string();
     let port = config.get("port".to_string()).unwrap().get_string();
+    unsafe { net::load(); }
     println!("Binding to {}:{}", ip, port);
-    let channel = Channel::new(ip, port);
-    channel.await.main().await;
+    let channel = Channel::new(ip, port).await;
+    unsafe { channel.main().await.expect("Error main channel!"); }
 }
 
-struct Channel {
+pub struct Channel {
     port: TcpListener,
 }
 
@@ -29,7 +35,10 @@ impl Channel {
     pub async fn new(ip: &str, port: &str) -> Channel {
         Channel { port: TcpListener::bind(format!("{}:{}", ip, port)).unwrap() }
     }
-    async fn main(&self) {
-        loop {}
+    async unsafe fn main(&self) -> Result<()> {
+        loop {
+            let (steam, _) = self.port.accept().unwrap();
+            spawn(Player::handle(steam));
+        }
     }
 }
